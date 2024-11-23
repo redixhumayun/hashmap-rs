@@ -123,20 +123,19 @@ where
         let entry_size = std::mem::size_of::<Entry<K, V>>();
         let vec_size = new_capacity * entry_size;
         
-        eprintln!("Resize Stats:");
-        eprintln!("  Old capacity: {}, New capacity: {}", old_capacity, new_capacity);
-        eprintln!("  Entry size: {} bytes", entry_size);
-        eprintln!("  New vec size: {} bytes", vec_size);
-        eprintln!("  Current size (items): {}", self.size);
+        println!("Resize Stats:");
+        println!("  Old capacity: {}, New capacity: {}", old_capacity, new_capacity);
+        println!("  Entry size: {} bytes", entry_size);
+        println!("  New vec size: {} bytes", vec_size);
+        println!("  Current size (items): {}", self.size);
         
         // Track existing data
         let old_entries: Vec<Entry<K, V>> = self.data.drain(..).collect();
-        eprintln!("  Actual old vec size: {} bytes", old_entries.len() * entry_size);
+        println!("  Actual old vec size: {} bytes", old_entries.len() * entry_size);
 
         //  do the resizing
         self.capacity = new_capacity;
         let mut new_data: Vec<Entry<K, V>> = vec![Entry::Empty; new_capacity];
-        let old_entries: Vec<Entry<K, V>> = self.data.drain(..).collect();
         for entry in old_entries {
             if let Entry::Occupied(k, v) = entry {
                 let mut index = self.hash(&k);
@@ -147,6 +146,7 @@ where
             }
         }
         self.data = new_data;
+        println!("Done resizing!!!");
     }
 
     fn delete(&mut self, key: K) -> anyhow::Result<()> {
