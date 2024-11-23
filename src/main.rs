@@ -118,34 +118,37 @@ where
     fn resize(&mut self) {
         let old_capacity = self.capacity;
         let new_capacity = self.capacity * 2;
-        
+
         // Calculate sizes
         let entry_size = std::mem::size_of::<Entry<K, V>>();
         let vec_size = new_capacity * entry_size;
-        
+
         println!("Resize Stats:");
-        println!("  Old capacity: {}, New capacity: {}", old_capacity, new_capacity);
+        println!(
+            "  Old capacity: {}, New capacity: {}",
+            old_capacity, new_capacity
+        );
         println!("  Entry size: {} bytes", entry_size);
         println!("  New vec size: {} bytes", vec_size);
         println!("  Current size (items): {}", self.size);
-        
-        // Track existing data
-        let old_entries: Vec<Entry<K, V>> = self.data.drain(..).collect();
-        println!("  Actual old vec size: {} bytes", old_entries.len() * entry_size);
+        println!(
+            "  Actual old vec size: {} bytes",
+            self.data.len() * entry_size
+        );
 
-        //  do the resizing
+        // let old_entries: Vec<Entry<K, V>> = self.data.drain(..).collect();
+        let new_data: Vec<Entry<K, V>> = vec![Entry::Empty; new_capacity];
+        let old_data = std::mem::replace(&mut self.data, new_data);
         self.capacity = new_capacity;
-        let mut new_data: Vec<Entry<K, V>> = vec![Entry::Empty; new_capacity];
-        for entry in old_entries {
+        for entry in old_data {
             if let Entry::Occupied(k, v) = entry {
                 let mut index = self.hash(&k);
-                while let Some(Entry::Occupied(_, _)) = new_data.get(index) {
+                while let Some(Entry::Occupied(_, _)) = self.data.get(index) {
                     index = (index + 1) % self.capacity;
                 }
-                new_data[index] = Entry::Occupied(k, v);
+                self.data[index] = Entry::Occupied(k, v);
             }
         }
-        self.data = new_data;
         println!("Done resizing!!!");
     }
 
@@ -252,7 +255,7 @@ mod tests {
 
     #[test]
     fn profile_memory_patterns() {
-        eprintln!("Test starting");
+        println!("Test starting");
         let mut map: HashMap<String, String> = HashMap::new(16);
 
         // Three distinct workload phases to stress different patterns
