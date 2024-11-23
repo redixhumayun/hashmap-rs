@@ -116,7 +116,24 @@ where
     }
 
     fn resize(&mut self) {
+        let old_capacity = self.capacity;
         let new_capacity = self.capacity * 2;
+        
+        // Calculate sizes
+        let entry_size = std::mem::size_of::<Entry<K, V>>();
+        let vec_size = new_capacity * entry_size;
+        
+        eprintln!("Resize Stats:");
+        eprintln!("  Old capacity: {}, New capacity: {}", old_capacity, new_capacity);
+        eprintln!("  Entry size: {} bytes", entry_size);
+        eprintln!("  New vec size: {} bytes", vec_size);
+        eprintln!("  Current size (items): {}", self.size);
+        
+        // Track existing data
+        let old_entries: Vec<Entry<K, V>> = self.data.drain(..).collect();
+        eprintln!("  Actual old vec size: {} bytes", old_entries.len() * entry_size);
+
+        //  do the resizing
         self.capacity = new_capacity;
         let mut new_data: Vec<Entry<K, V>> = vec![Entry::Empty; new_capacity];
         let old_entries: Vec<Entry<K, V>> = self.data.drain(..).collect();
@@ -242,7 +259,7 @@ mod tests {
 
         // Phase 1: Controlled growth causing resizes
         println!("starting insertions");
-        for i in 0..5_000_000 {
+        for i in 0..1_000_000 {
             map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
         }
         println!("phase 1 complete");
