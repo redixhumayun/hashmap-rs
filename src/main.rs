@@ -124,7 +124,7 @@ where
             if let Entry::Occupied(k, v) = entry {
                 let mut index = self.hash(&k);
                 while let Some(Entry::Occupied(_, _)) = new_data.get(index) {
-                    index += 1;
+                    index = (index + 1) % self.capacity;
                 }
                 new_data[index] = Entry::Occupied(k, v);
             }
@@ -235,11 +235,13 @@ mod tests {
 
     #[test]
     fn profile_memory_patterns() {
+        eprintln!("Test starting");
         let mut map: HashMap<String, String> = HashMap::new(16);
 
         // Three distinct workload phases to stress different patterns
 
         // Phase 1: Controlled growth causing resizes
+        println!("starting insertions");
         for i in 0..100_000_000 {
             map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
         }
