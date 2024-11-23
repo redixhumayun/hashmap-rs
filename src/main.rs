@@ -240,9 +240,10 @@ mod tests {
         // Three distinct workload phases to stress different patterns
 
         // Phase 1: Controlled growth causing resizes
-        for i in 0..100_000 {
-            map.insert(format!("key_{}", i), "x".repeat(100)).unwrap();
+        for i in 0..100_000_000 {
+            map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
         }
+        println!("phase 1 complete");
 
         // Phase 2: Heavy updates/overwrites
         for i in 0..50_000 {
