@@ -232,4 +232,31 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn profile_memory_patterns() {
+        let mut map: HashMap<String, String> = HashMap::new(16);
+
+        // Three distinct workload phases to stress different patterns
+
+        // Phase 1: Controlled growth causing resizes
+        for i in 0..100_000 {
+            map.insert(format!("key_{}", i), "x".repeat(100)).unwrap();
+        }
+
+        // Phase 2: Heavy updates/overwrites
+        for i in 0..50_000 {
+            map.insert(format!("key_{}", i), "y".repeat(200)).unwrap();
+        }
+
+        // Phase 3: Mixed deletes and inserts
+        for i in 0..75_000 {
+            if i % 2 == 0 {
+                map.delete(format!("key_{}", i)).unwrap();
+            } else {
+                map.insert(format!("key_new_{}", i), "z".repeat(150))
+                    .unwrap();
+            }
+        }
+    }
 }
