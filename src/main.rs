@@ -193,7 +193,6 @@ fn main() {
     // Three distinct workload phases to stress different patterns
 
     // Phase 1: Controlled growth causing resizes
-    println!("starting insertions");
     for i in 0..5_000_000 {
         map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
     }
