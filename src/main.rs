@@ -194,7 +194,7 @@ fn main() {
 
     // Phase 1: Controlled growth causing resizes
     println!("starting insertions");
-    for i in 0..1_000_000 {
+    for i in 0..5_000_000 {
         map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
     }
     println!("phase 1 complete");
