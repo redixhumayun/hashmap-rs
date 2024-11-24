@@ -118,7 +118,7 @@ where
 
     fn resize(&mut self) {
         let old_capacity = self.capacity;
-        let new_capacity = self.capacity.next_power_of_two();
+        let new_capacity = old_capacity << 1;
 
         // Calculate sizes
         let entry_size = std::mem::size_of::<Entry<K, V>>();
