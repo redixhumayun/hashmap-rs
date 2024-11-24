@@ -34,10 +34,11 @@ where
     V: Value,
 {
     fn new(capacity: usize) -> Self {
-        let data = vec![Entry::Empty; capacity];
+        let initial_capacity = 16.max(capacity.next_power_of_two());
+        let data = vec![Entry::Empty; initial_capacity];
         Self {
             data,
-            capacity,
+            capacity: initial_capacity,
             size: 0,
         }
     }
@@ -117,7 +118,7 @@ where
 
     fn resize(&mut self) {
         let old_capacity = self.capacity;
-        let new_capacity = self.capacity * 2;
+        let new_capacity = self.capacity.next_power_of_two();
 
         // Calculate sizes
         let entry_size = std::mem::size_of::<Entry<K, V>>();
