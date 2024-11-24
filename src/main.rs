@@ -187,14 +187,32 @@ where
 }
 
 fn main() {
-    let mut hash_map: HashMap<String, String> = HashMap::new(10);
-    let key = "key".to_string();
-    let value = "value".to_string();
-    hash_map.insert(key.clone(), value.clone()).unwrap();
-    let retrieved_value = hash_map.get(key.clone()).unwrap();
-    assert_eq!(retrieved_value, Some(value.clone()));
-    hash_map.delete(key.clone()).unwrap();
-    assert_eq!(hash_map.get(key.clone()).unwrap(), None);
+    println!("Test starting");
+    let mut map: HashMap<String, String> = HashMap::new(16);
+
+    // Three distinct workload phases to stress different patterns
+
+    // Phase 1: Controlled growth causing resizes
+    println!("starting insertions");
+    for i in 0..1_000_000 {
+        map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
+    }
+    println!("phase 1 complete");
+
+    // Phase 2: Heavy updates/overwrites
+    for i in 0..50_000 {
+        map.insert(format!("key_{}", i), "y".repeat(200)).unwrap();
+    }
+
+    // Phase 3: Mixed deletes and inserts
+    for i in 0..75_000 {
+        if i % 2 == 0 {
+            map.delete(format!("key_{}", i)).unwrap();
+        } else {
+            map.insert(format!("key_new_{}", i), "z".repeat(150))
+                .unwrap();
+        }
+    }
 }
 
 #[cfg(test)]
