@@ -193,23 +193,29 @@ fn main() {
     // Three distinct workload phases to stress different patterns
 
     // Phase 1: Controlled growth causing resizes
-    for i in 0..5_000_000 {
-        map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
+    let keys: Vec<String> = (0..500_000).map(|i| format!("key_{}", i)).collect();
+    let values: Vec<String> = (0..500_000).map(|_| "x".repeat(1000)).collect();
+    for (key, value) in keys.into_iter().zip(values.into_iter()) {
+        map.insert(key, value).unwrap();
     }
     println!("phase 1 complete");
 
     // Phase 2: Heavy updates/overwrites
-    for i in 0..50_000 {
-        map.insert(format!("key_{}", i), "y".repeat(200)).unwrap();
+    let keys: Vec<String> = (0..500_000).map(|i| format!("key_{}", i)).collect();
+    let values: Vec<String> = (0..500_000).map(|_| "y".repeat(200)).collect();
+    for (key, value) in keys.into_iter().zip(values.into_iter()) {
+        map.insert(key, value).unwrap();
     }
 
     // Phase 3: Mixed deletes and inserts
     for i in 0..75_000 {
         if i % 2 == 0 {
-            map.delete(format!("key_{}", i)).unwrap();
+            let key = format!("key_{}", i);
+            map.delete(key).unwrap();
         } else {
-            map.insert(format!("key_new_{}", i), "z".repeat(150))
-                .unwrap();
+            let new_key = format!("key_new_{}", i);
+            let new_value = "z".repeat(150);
+            map.insert(new_key, new_value).unwrap();
         }
     }
 }
