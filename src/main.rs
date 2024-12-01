@@ -3,6 +3,9 @@
 mod open_addressing;
 use open_addressing::HashMap;
 
+mod chaining;
+// use chaining::HashMap;
+
 fn main() {
     println!("Test starting");
     let mut map: HashMap<String, String> = HashMap::new(16);
