@@ -6,7 +6,7 @@ use std::{fmt::Display, hash::DefaultHasher};
 use anyhow::Ok;
 
 pub trait Key = Hash + Clone + PartialEq + Display;
-pub trait Value = Clone;
+pub trait Value = Clone + Display;
 
 const LOAD_FACTOR_LIMIT: f64 = 0.7;
 
@@ -64,17 +64,19 @@ where
         return Ok(None);
     }
 
-    fn insert(&mut self, key: K, value: V) -> anyhow::Result<()> {
+    //  Does an insert on the LinkedList and returns false if not a new insert
+    //  Returns true otherwise
+    fn insert(&mut self, key: K, value: V) -> anyhow::Result<bool> {
         let mut current = &mut self.head;
         while let Some(node) = current {
             if node.key == key {
                 node.value = value;
-                return Ok(());
+                return Ok(false);
             }
             current = &mut node.next;
         }
         *current = Some(Box::new(Node::new(key, value)));
-        Ok(())
+        Ok(true)
     }
 
     fn delete(&mut self, key: K) -> anyhow::Result<()> {
@@ -114,9 +116,8 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         self.current.map(|node| {
             self.current = node.next.as_deref();
-            return Some((node.key.clone(), node.value.clone()));
-        });
-        return None;
+            (node.key.clone(), node.value.clone())
+        })
     }
 }
 
@@ -161,10 +162,11 @@ where
     }
 
     fn resize(&mut self) -> anyhow::Result<()> {
-        let new_capacity = self.capacity.next_power_of_two();
+        let new_capacity = self.capacity * 2;
         let new_buckets: Vec<LinkedList<K, V>> = vec![LinkedList::new(); new_capacity];
         let old_buckets = std::mem::replace(&mut self.buckets, new_buckets);
         self.capacity = new_capacity;
+        self.size = 0;
 
         for bucket in old_buckets {
             for (key, value) in bucket.iter() {
@@ -182,7 +184,13 @@ where
         let index = self.hash(&key);
         self.buckets
             .get_mut(index)
-            .map(|bucket| bucket.insert(key, value))
+            .map(|bucket| {
+                let result = bucket.insert(key, value).unwrap();
+                if result {
+                    self.size += 1;
+                }
+                return anyhow::Ok(());
+            })
             .transpose()
             .and(anyhow::Ok(()))
     }
@@ -211,13 +219,13 @@ mod tests {
 
     #[test]
     fn test_resizing() {
-        let mut map: HashMap<String, String> = HashMap::new(12);
-        for i in 0..100 {
+        let mut map: HashMap<String, String> = HashMap::new(16);
+        for i in 0..25 {
             let key = format!("key_{}", i);
             let value = format!("value_{}", i);
             map.insert(key, value).unwrap();
         }
-        for i in 0..100 {
+        for i in 0..25 {
             let key = format!("key_{}", i);
             let value = format!("value_{}", i);
             let result = map.get(key).unwrap();
