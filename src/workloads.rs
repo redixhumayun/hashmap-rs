@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(unused_variables)]
 use rand::Rng;
 
 pub trait HashMapBehavior<K, V> {
@@ -72,18 +73,17 @@ pub mod generators {
 
     pub fn run_load_factor_workload<M: HashMapBehavior<String, String>>(
         workload: &LoadFactorWorkload,
-    ) -> M {
+    ) {
         let mut map = M::new(16);
         for i in 0..workload.size {
             map.insert(format!("key_{}", i), "x".repeat(workload.value_size))
                 .unwrap();
         }
-        map
     }
 
     pub fn run_key_distribution_workload<M: HashMapBehavior<String, String>>(
         workload: &KeyDistributionWorkload,
-    ) -> M {
+    ) {
         let mut map = M::new(workload.size);
         let mut rng = rand::thread_rng();
 
@@ -108,12 +108,11 @@ pub mod generators {
                 }
             }
         }
-        map
     }
 
     pub fn run_operation_mix_workload<M: HashMapBehavior<String, String>>(
         workload: &OperationMixWorkload,
-    ) -> (M, usize) {
+    ) {
         // Returns map and operations performed
         let mut map = M::new(workload.initial_size);
         let mut rng = rand::thread_rng();
@@ -140,7 +139,5 @@ pub mod generators {
             }
             ops_performed += 1;
         }
-
-        (map, ops_performed)
     }
 }

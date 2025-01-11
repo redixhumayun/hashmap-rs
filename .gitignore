@@ -2,3 +2,4 @@
 .vscode/**/*
 flamegraph.svg
 profile_data*/**/*
+rustc-ice*

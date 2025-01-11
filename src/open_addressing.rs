@@ -6,8 +6,11 @@ use std::{
 
 use anyhow::{anyhow, bail};
 
-pub trait Key = Hash + Clone + PartialEq + Display;
-pub trait Value = Clone;
+pub trait Key: Hash + Clone + PartialEq + Display {}
+impl<T> Key for T where T: Hash + Clone + PartialEq + Display {}
+
+pub trait Value: Clone {}
+impl<T> Value for T where T: Clone {}
 
 const LOAD_FACTOR_LIMIT: f64 = 0.7;
 
@@ -43,10 +46,7 @@ where
         }
     }
 
-    fn hash(&self, key: &K) -> usize
-    where
-        K: Key,
-    {
+    fn hash(&self, key: &K) -> usize {
         let mut hasher = DefaultHasher::new();
         key.hash(&mut hasher);
         (hasher.finish() as usize) % self.capacity

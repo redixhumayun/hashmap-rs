@@ -1,12 +1,9 @@
-#![feature(trait_alias)]
-
 use clap::Parser;
 
-mod chaining;
-mod open_addressing;
 mod workloads;
 
 use hashmap::workloads::{generators::run_load_factor_workload, LoadFactorWorkload};
+use hashmap::{chaining, open_addressing};
 use workloads::{
     generators::{run_key_distribution_workload, run_operation_mix_workload},
     KeyDistributionWorkload, OperationMixWorkload,
@@ -35,17 +32,23 @@ fn main() {
     let args = Args::parse();
 
     match args.workload.as_str() {
-        "load_factor" => match args.implementation.as_str() {
-            "chaining" => run_load_factor_workload(&LoadFactorWorkload {
-                size: 1_000_000,
-                value_size: 100,
-            }),
-            "open_addressing" => run_load_factor_workload(&LoadFactorWorkload {
-                size: 1_000_000,
-                value_size: 100,
-            }),
-            _ => eprintln!("invalid implementation"),
-        },
+        "load_factor" => {
+            match args.implementation.as_str() {
+                "chaining" => run_load_factor_workload::<chaining::HashMap<String, String>>(
+                    &LoadFactorWorkload {
+                        size: 1_000_000,
+                        value_size: 100,
+                    },
+                ),
+                "open_addressing" => run_load_factor_workload::<
+                    open_addressing::HashMap<String, String>,
+                >(&LoadFactorWorkload {
+                    size: 1_000_000,
+                    value_size: 100,
+                }),
+                _ => eprintln!("invalid implementation"),
+            }
+        }
         "key_distribution" => {
             let pattern = match args.key_dist.as_deref() {
                 Some("uniform") => workloads::KeyPattern::Uniform,
@@ -53,19 +56,24 @@ fn main() {
                 Some("sequential") => workloads::KeyPattern::Sequential,
                 _ => {
                     panic!("Invalid key distribution pattern");
-                    return;
                 }
             };
 
             match args.implementation.as_str() {
-                "chaining" => run_key_distribution_workload(&KeyDistributionWorkload {
+                "chaining" => run_key_distribution_workload::<chaining::HashMap<String, String>>(
+                    &KeyDistributionWorkload {
+                        size: 1000,
+                        pattern,
+                    },
+                ),
+
+                "open_addressing" => run_key_distribution_workload::<
+                    open_addressing::HashMap<String, String>,
+                >(&KeyDistributionWorkload {
                     size: 1000,
                     pattern,
                 }),
-                "open_addressing" => run_key_distribution_workload(&KeyDistributionWorkload {
-                    size: 1000,
-                    pattern,
-                }),
+
                 _ => panic!("invalid implementation"),
             }
         }
@@ -81,13 +89,17 @@ fn main() {
             };
 
             match args.implementation.as_str() {
-                "chaining" => run_operation_mix_workload(&OperationMixWorkload {
-                    initial_size: 1000,
-                    operations: 1000,
-                    read_pct,
-                    write_pct,
-                }),
-                "open_addressing" => run_operation_mix_workload(&OperationMixWorkload {
+                "chaining" => run_operation_mix_workload::<chaining::HashMap<String, String>>(
+                    &OperationMixWorkload {
+                        initial_size: 1000,
+                        operations: 1000,
+                        read_pct,
+                        write_pct,
+                    },
+                ),
+                "open_addressing" => run_operation_mix_workload::<
+                    open_addressing::HashMap<String, String>,
+                >(&OperationMixWorkload {
                     initial_size: 1000,
                     operations: 1000,
                     read_pct,
@@ -97,5 +109,5 @@ fn main() {
             }
         }
         _ => panic!("Invalid workload"),
-    }
+    };
 }

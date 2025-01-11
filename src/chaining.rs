@@ -4,8 +4,11 @@ use std::{fmt::Display, hash::DefaultHasher};
 
 use anyhow::Ok;
 
-pub trait Key = Hash + Clone + PartialEq + Display;
-pub trait Value = Clone + Display;
+pub trait Key: Hash + Clone + PartialEq + Display {}
+impl<T> Key for T where T: Hash + Clone + PartialEq + Display {}
+
+pub trait Value: Clone {}
+impl<T> Value for T where T: Clone {}
 
 const LOAD_FACTOR_LIMIT: f64 = 0.7;
 
