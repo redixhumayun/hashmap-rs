@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use clap::Parser;
 
 mod workloads;
@@ -34,16 +36,21 @@ fn main() {
     match args.workload.as_str() {
         "load_factor" => {
             match args.implementation.as_str() {
-                "chaining" => run_load_factor_workload::<chaining::HashMap<String, String>>(
-                    &LoadFactorWorkload {
-                        size: 1_000_000,
-                        value_size: 100,
-                    },
-                ),
+                "chaining" => {
+                    let start = Instant::now();
+                    run_load_factor_workload::<chaining::HashMap<String, String>>(
+                        &LoadFactorWorkload {
+                            size: 10_000_000,
+                            value_size: 100,
+                        },
+                    );
+                    let duration = start.elapsed();
+                    println!("Workload completed in {:?}", duration);
+                }
                 "open_addressing" => run_load_factor_workload::<
                     open_addressing::HashMap<String, String>,
                 >(&LoadFactorWorkload {
-                    size: 1_000_000,
+                    size: 10_000_000,
                     value_size: 100,
                 }),
                 _ => eprintln!("invalid implementation"),
