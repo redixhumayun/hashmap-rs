@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-
 use std::hash::{Hash, Hasher};
 use std::{fmt::Display, hash::DefaultHasher};
 

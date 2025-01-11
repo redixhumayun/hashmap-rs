@@ -121,23 +121,22 @@ where
         let new_capacity = old_capacity << 1;
 
         // Calculate sizes
-        let entry_size = std::mem::size_of::<Entry<K, V>>();
-        let vec_size = new_capacity * entry_size;
-
-        println!("Resize Stats:");
-        println!(
-            "  Old capacity: {}, New capacity: {}",
-            old_capacity, new_capacity
-        );
-        println!("  Entry size: {} bytes", entry_size);
-        println!("  New vec size: {} bytes", vec_size);
-        println!("  Current size (items): {}", self.size);
-        println!(
-            "  Actual old vec size: {} bytes",
-            self.data.len() * entry_size
-        );
-
+        // let entry_size = std::mem::size_of::<Entry<K, V>>();
+        // let vec_size = new_capacity * entry_size;
+        // println!("Resize Stats:");
+        // println!(
+        //     "  Old capacity: {}, New capacity: {}",
+        //     old_capacity, new_capacity
+        // );
+        // println!("  Entry size: {} bytes", entry_size);
+        // println!("  New vec size: {} bytes", vec_size);
+        // println!("  Current size (items): {}", self.size);
+        // println!(
+        //     "  Actual old vec size: {} bytes",
+        //     self.data.len() * entry_size
+        // );
         // let old_entries: Vec<Entry<K, V>> = self.data.drain(..).collect();
+
         let new_data: Vec<Entry<K, V>> = vec![Entry::Empty; new_capacity];
         let old_data = std::mem::replace(&mut self.data, new_data);
         self.capacity = new_capacity;
@@ -150,7 +149,7 @@ where
                 self.data[index] = Entry::Occupied(k, v);
             }
         }
-        println!("Done resizing!!!");
+        // println!("Done resizing!!!");
     }
 
     pub fn delete(&mut self, key: K) -> anyhow::Result<()> {
@@ -245,17 +244,14 @@ mod tests {
 
     #[test]
     fn profile_memory_patterns() {
-        println!("Test starting");
         let mut map: HashMap<String, String> = HashMap::new(16);
 
         // Three distinct workload phases to stress different patterns
 
         // Phase 1: Controlled growth causing resizes
-        println!("starting insertions");
         for i in 0..1_000_000 {
             map.insert(format!("key_{}", i), "x".repeat(1000)).unwrap();
         }
-        println!("phase 1 complete");
 
         // Phase 2: Heavy updates/overwrites
         for i in 0..50_000 {
