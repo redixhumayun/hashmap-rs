@@ -3,3 +3,6 @@
 *.svg
 profile_data*/**/*
 rustc-ice*
+perf.*
+profiling_results/**/*
+*.swp
