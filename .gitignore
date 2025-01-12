@@ -1,5 +1,5 @@
 /target
 .vscode/**/*
-flamegraph.svg
+*.svg
 profile_data*/**/*
 rustc-ice*
