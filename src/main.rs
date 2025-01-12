@@ -69,7 +69,7 @@ fn main() {
             match args.implementation.as_str() {
                 "chaining" => run_key_distribution_workload::<chaining::HashMap<String, String>>(
                     &KeyDistributionWorkload {
-                        size: 1000,
+                        size: 10_000_000,
                         pattern,
                     },
                 ),
@@ -77,7 +77,7 @@ fn main() {
                 "open_addressing" => run_key_distribution_workload::<
                     open_addressing::HashMap<String, String>,
                 >(&KeyDistributionWorkload {
-                    size: 1000,
+                    size: 10_000_000,
                     pattern,
                 }),
 
