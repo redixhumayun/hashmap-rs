@@ -1,15 +1,14 @@
-use std::time::Instant;
-
 use clap::Parser;
 
 mod workloads;
 
-use hashmap::workloads::{generators::run_load_factor_workload, LoadFactorWorkload};
 use hashmap::{chaining, open_addressing};
-use workloads::{
-    generators::{run_key_distribution_workload, run_operation_mix_workload},
-    KeyDistributionWorkload, OperationMixWorkload,
+
+use crate::workloads::generators::{
+    run_key_distribution_workload_integers, run_load_factor_workload_integers,
+    run_operation_mix_workload,
 };
+use crate::workloads::{KeyDistributionWorkload, LoadFactorWorkload, OperationMixWorkload};
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -34,28 +33,21 @@ fn main() {
     let args = Args::parse();
 
     match args.workload.as_str() {
-        "load_factor" => {
-            match args.implementation.as_str() {
-                "chaining" => {
-                    let start = Instant::now();
-                    run_load_factor_workload::<chaining::HashMap<String, String>>(
-                        &LoadFactorWorkload {
-                            size: 10_000_000,
-                            value_size: 100,
-                        },
-                    );
-                    let duration = start.elapsed();
-                    println!("Workload completed in {:?}", duration);
-                }
-                "open_addressing" => run_load_factor_workload::<
-                    open_addressing::HashMap<String, String>,
-                >(&LoadFactorWorkload {
+        "load_factor" => match args.implementation.as_str() {
+            "chaining" => run_load_factor_workload_integers::<chaining::HashMap<u64, u64>>(
+                &LoadFactorWorkload {
                     size: 10_000_000,
                     value_size: 100,
-                }),
-                _ => eprintln!("invalid implementation"),
-            }
-        }
+                },
+            ),
+            "open_addressing" => run_load_factor_workload_integers::<
+                open_addressing::HashMap<u64, u64>,
+            >(&LoadFactorWorkload {
+                size: 10_000_000,
+                value_size: 100,
+            }),
+            _ => eprintln!("invalid implementation"),
+        },
         "key_distribution" => {
             let pattern = match args.key_dist.as_deref() {
                 Some("uniform") => workloads::KeyPattern::Uniform,
@@ -67,15 +59,17 @@ fn main() {
             };
 
             match args.implementation.as_str() {
-                "chaining" => run_key_distribution_workload::<chaining::HashMap<String, String>>(
-                    &KeyDistributionWorkload {
-                        size: 10_000_000,
-                        pattern,
-                    },
-                ),
+                "chaining" => {
+                    run_key_distribution_workload_integers::<chaining::HashMap<u64, u64>>(
+                        &KeyDistributionWorkload {
+                            size: 10_000_000,
+                            pattern,
+                        },
+                    )
+                }
 
-                "open_addressing" => run_key_distribution_workload::<
-                    open_addressing::HashMap<String, String>,
+                "open_addressing" => run_key_distribution_workload_integers::<
+                    open_addressing::HashMap<u64, u64>,
                 >(&KeyDistributionWorkload {
                     size: 10_000_000,
                     pattern,

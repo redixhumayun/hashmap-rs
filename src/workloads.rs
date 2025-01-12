@@ -81,6 +81,15 @@ pub mod generators {
         }
     }
 
+    pub fn run_load_factor_workload_integers<M: HashMapBehavior<u64, u64>>(
+        workload: &LoadFactorWorkload,
+    ) {
+        let mut map = M::new(16);
+        for i in 0..workload.size {
+            map.insert(i as u64, i as u64).unwrap();
+        }
+    }
+
     pub fn run_key_distribution_workload<M: HashMapBehavior<String, String>>(
         workload: &KeyDistributionWorkload,
     ) {
@@ -105,6 +114,32 @@ pub mod generators {
                 for i in 0..workload.size {
                     map.insert(format!("{:020}", i), "value".to_string())
                         .unwrap();
+                }
+            }
+        }
+    }
+
+    pub fn run_key_distribution_workload_integers<M: HashMapBehavior<u64, u64>>(
+        workload: &KeyDistributionWorkload,
+    ) {
+        let mut map = M::new(workload.size);
+        let mut rng = rand::thread_rng();
+
+        match workload.pattern {
+            KeyPattern::Uniform => {
+                for _ in 0..workload.size {
+                    map.insert(rng.gen::<u64>(), 42).unwrap();
+                }
+            }
+            KeyPattern::Clustered => {
+                for i in 0..workload.size {
+                    let cluster = i / (workload.size / 10); // 10 clusters
+                    map.insert((cluster as u64) << 32 | (i as u64), 42).unwrap();
+                }
+            }
+            KeyPattern::Sequential => {
+                for i in 0..workload.size {
+                    map.insert(i as u64, 42).unwrap();
                 }
             }
         }
