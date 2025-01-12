@@ -37,6 +37,14 @@ where
     V: Value,
 {
     pub fn new(capacity: usize) -> Self {
+        println!(
+            "size of (String, String) -> {}",
+            std::mem::size_of::<(String, String)>()
+        );
+        println!(
+            "size of entry -> {}",
+            std::mem::size_of::<Entry<String, String>>()
+        );
         let initial_capacity = 16.max(capacity.next_power_of_two());
         let data = vec![Entry::Empty; initial_capacity];
         Self {
