@@ -23,9 +23,7 @@ where
     K: Key,
     V: Value,
 {
-    // Each byte stores status for 4 entries (2 bits each)
     status_bits: Vec<u8>,
-    // Store key-value pairs contiguously
     entries: Vec<(K, V)>,
     capacity: usize,
     size: usize,

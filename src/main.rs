@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use clap::Parser;
 
 mod workloads;
@@ -5,8 +6,8 @@ mod workloads;
 use hashmap::{chaining, open_addressing, open_addressing_compact};
 
 use crate::workloads::generators::{
-    run_key_distribution_workload_integers, run_load_factor_workload_integers,
-    run_operation_mix_workload,
+    run_key_distribution_workload_integers, run_load_factor_workload,
+    run_load_factor_workload_integers, run_operation_mix_workload,
 };
 use crate::workloads::{KeyDistributionWorkload, LoadFactorWorkload, OperationMixWorkload};
 
@@ -33,27 +34,50 @@ fn main() {
     let args = Args::parse();
 
     match args.workload.as_str() {
-        "load_factor" => match args.implementation.as_str() {
-            "chaining" => run_load_factor_workload_integers::<chaining::HashMap<u64, u64>>(
-                &LoadFactorWorkload {
+        "load_factor" => {
+            match args.implementation.as_str() {
+                "chaining" => run_load_factor_workload::<chaining::HashMap<String, String>>(
+                    &LoadFactorWorkload {
+                        size: 10_000_000,
+                        value_size: 100,
+                    },
+                ),
+                "open_addressing" => run_load_factor_workload::<
+                    open_addressing::HashMap<String, String>,
+                >(&LoadFactorWorkload {
                     size: 10_000_000,
                     value_size: 100,
-                },
-            ),
-            "open_addressing" => run_load_factor_workload_integers::<
-                open_addressing::HashMap<u64, u64>,
-            >(&LoadFactorWorkload {
-                size: 10_000_000,
-                value_size: 100,
-            }),
-            "open_addressing_compact" => run_load_factor_workload_integers::<
-                open_addressing_compact::HashMap<u64, u64>,
-            >(&LoadFactorWorkload {
-                size: 10_000_000,
-                value_size: 100,
-            }),
-            _ => panic!("invalid implementation called for workload of load_factor"),
-        },
+                }),
+                "open_addressing_compact" => run_load_factor_workload::<
+                    open_addressing_compact::HashMap<String, String>,
+                >(&LoadFactorWorkload {
+                    size: 10_000_000,
+                    value_size: 100,
+                }),
+                _ => panic!("invalid implementation called for workload of load_factor"),
+            }
+        }
+        // "load_factor" => match args.implementation.as_str() {
+        //     "chaining" => run_load_factor_workload_integers::<chaining::HashMap<u64, u64>>(
+        //         &LoadFactorWorkload {
+        //             size: 10_000_000,
+        //             value_size: 100,
+        //         },
+        //     ),
+        //     "open_addressing" => run_load_factor_workload_integers::<
+        //         open_addressing::HashMap<u64, u64>,
+        //     >(&LoadFactorWorkload {
+        //         size: 10_000_000,
+        //         value_size: 100,
+        //     }),
+        //     "open_addressing_compact" => run_load_factor_workload_integers::<
+        //         open_addressing_compact::HashMap<u64, u64>,
+        //     >(&LoadFactorWorkload {
+        //         size: 10_000_000,
+        //         value_size: 100,
+        //     }),
+        //     _ => panic!("invalid implementation called for workload of load_factor"),
+        // },
         "key_distribution" => {
             let pattern = match args.key_dist.as_deref() {
                 Some("uniform") => workloads::KeyPattern::Uniform,
