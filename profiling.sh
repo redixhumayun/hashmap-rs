@@ -53,5 +53,6 @@ cargo build --release
 # Run for both implementations
 profile_impl "chaining"
 profile_impl "open_addressing"
+profile_impl "open_addressing_compact"
 
 echo "Done! Results are in $RESULTS_DIR/"
