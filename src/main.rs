@@ -2,7 +2,7 @@ use clap::Parser;
 
 mod workloads;
 
-use hashmap::{chaining, open_addressing};
+use hashmap::{chaining, open_addressing, open_addressing_compact};
 
 use crate::workloads::generators::{
     run_key_distribution_workload_integers, run_load_factor_workload_integers,
@@ -46,7 +46,13 @@ fn main() {
                 size: 10_000_000,
                 value_size: 100,
             }),
-            _ => eprintln!("invalid implementation"),
+            "open_addressing_compact" => run_load_factor_workload_integers::<
+                open_addressing_compact::HashMap<u64, u64>,
+            >(&LoadFactorWorkload {
+                size: 10_000_000,
+                value_size: 100,
+            }),
+            _ => panic!("invalid implementation called for workload of load_factor"),
         },
         "key_distribution" => {
             let pattern = match args.key_dist.as_deref() {
@@ -70,6 +76,12 @@ fn main() {
 
                 "open_addressing" => run_key_distribution_workload_integers::<
                     open_addressing::HashMap<u64, u64>,
+                >(&KeyDistributionWorkload {
+                    size: 10_000_000,
+                    pattern,
+                }),
+                "open_addressing_compact" => run_key_distribution_workload_integers::<
+                    open_addressing_compact::HashMap<u64, u64>,
                 >(&KeyDistributionWorkload {
                     size: 10_000_000,
                     pattern,
@@ -100,6 +112,14 @@ fn main() {
                 ),
                 "open_addressing" => run_operation_mix_workload::<
                     open_addressing::HashMap<String, String>,
+                >(&OperationMixWorkload {
+                    initial_size: 1000,
+                    operations: 1000,
+                    read_pct,
+                    write_pct,
+                }),
+                "open_addressing_compact" => run_operation_mix_workload::<
+                    open_addressing_compact::HashMap<String, String>,
                 >(&OperationMixWorkload {
                     initial_size: 1000,
                     operations: 1000,

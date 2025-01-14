@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-#![allow(unused_variables)]
 use rand::Rng;
 
 pub trait HashMapBehavior<K, V> {
@@ -9,7 +8,7 @@ pub trait HashMapBehavior<K, V> {
     fn delete(&mut self, key: K) -> anyhow::Result<()>;
 }
 
-// Implement for both HashMap variants
+// Implement for all HashMap variants
 impl<K: crate::chaining::Key, V: crate::chaining::Value> HashMapBehavior<K, V>
     for crate::chaining::HashMap<K, V>
 {
@@ -29,6 +28,23 @@ impl<K: crate::chaining::Key, V: crate::chaining::Value> HashMapBehavior<K, V>
 
 impl<K: crate::open_addressing::Key, V: crate::open_addressing::Value> HashMapBehavior<K, V>
     for crate::open_addressing::HashMap<K, V>
+{
+    fn new(capacity: usize) -> Self {
+        Self::new(capacity)
+    }
+    fn insert(&mut self, key: K, value: V) -> anyhow::Result<()> {
+        self.insert(key, value)
+    }
+    fn get(&self, key: K) -> anyhow::Result<Option<V>> {
+        self.get(key)
+    }
+    fn delete(&mut self, key: K) -> anyhow::Result<()> {
+        self.delete(key)
+    }
+}
+
+impl<K: crate::open_addressing_compact::Key, V: crate::open_addressing_compact::Value>
+    HashMapBehavior<K, V> for crate::open_addressing_compact::HashMap<K, V>
 {
     fn new(capacity: usize) -> Self {
         Self::new(capacity)
@@ -151,13 +167,13 @@ pub mod generators {
         // Returns map and operations performed
         let mut map = M::new(workload.initial_size);
         let mut rng = rand::thread_rng();
-        let mut ops_performed = 0;
+        let mut _ops_performed = 0;
 
         // Pre-populate
         for i in 0..workload.initial_size {
             map.insert(format!("key_{}", i), "initial".to_string())
                 .unwrap();
-            ops_performed += 1;
+            _ops_performed += 1;
         }
 
         // Run mixed workload
@@ -172,7 +188,7 @@ pub mod generators {
             } else {
                 let _ = map.delete(format!("key_{}", key_idx));
             }
-            ops_performed += 1;
+            _ops_performed += 1;
         }
     }
 }
